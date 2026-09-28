@@ -1,0 +1,7 @@
+# Phase 1 — Parser dependencies
+# Install with: pip3 install -r parser/requirements.txt
+
+html2text>=2024.2.26     # HTML → plain-text conversion (fallback for HTML-only bodies)
+python-dateutil>=2.9.0   # Robust date parsing fallback (supplementary to email.utils)
+pyarrow>=17.0.0          # Parquet output for Spark consumption
+pandas>=2.2.0            # Optional: used in downstream Spark/Hive stages

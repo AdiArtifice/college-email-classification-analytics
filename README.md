@@ -100,6 +100,7 @@ Every technology is chosen to fulfill a distinct, defensible role in the Big Dat
 | **Distributed Batch** | Hadoop MapReduce (Java) | Java 11 / Hadoop 3.4.1 | Native distributed batch aggregation computing email counts per `sender_domain × month`. |
 | **In-Memory ML** | Apache Spark / PySpark MLlib | 3.5.6 | Distributed text cleaning, TF-IDF feature hashing (`HashingTF` + `IDF`), and Logistic Regression training. |
 | **SQL Analytics** | Apache Hive / Spark SQL | 4.0.1 / Derby | External table schema registry over HDFS Parquet and execution of 7 analytical queries. |
+| **MLOps & Governance** | MLflow | 3.16.1 | Experiment tracking, model registry, artifact versioning, and automated production gates. |
 | **Serving & UI** | Streamlit + Plotly | 1.64.0 / 7.1.0 | Fast, interactive dashboard reading materialized Parquet/CSV files with zero live cluster latency. |
 
 ---

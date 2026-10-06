@@ -79,6 +79,29 @@ def parse_args():
         default=False,
         help='Skip Phase 5 information extraction (campus_type, organization, deadline, etc.)'
     )
+    parser.add_argument(
+        '--track-mlflow',
+        action='store_true',
+        default=True,
+        help='Track run parameters, metrics, and models in MLflow'
+    )
+    parser.add_argument(
+        '--experiment-name',
+        default='College_Email_Classification',
+        help='MLflow experiment name'
+    )
+    parser.add_argument(
+        '--register-model',
+        action='store_true',
+        default=True,
+        help='Register candidate model in MLflow Model Registry'
+    )
+    parser.add_argument(
+        '--min-f1',
+        type=float,
+        default=0.85,
+        help='Minimum test F1 score required for production promotion gate'
+    )
     return parser.parse_args()
 
 
@@ -217,6 +240,45 @@ def run_pipeline():
     elapsed_time = round(time.time() - start_time, 2)
     print(f"\nPipeline completed successfully in {elapsed_time}s! 🎉")
 
+    # MLOps Experiment Tracking & Model Registry
+    mlops_info = None
+    if args.track_mlflow:
+        print("\n[Step 7/7 (cont.)] Logging run parameters, metrics, and models to MLflow...")
+        try:
+            from mlops.tracker import log_training_run
+            mlops_info = log_training_run(
+                experiment_name=args.experiment_name,
+                run_name=f"spark_mllib_{args.model_type.upper()}_{int(time.time())}",
+                model_type=args.model_type,
+                hyperparams={
+                    "reg_param": 0.01 if args.model_type == 'lr' else 1.0,
+                    "max_iter": 25 if args.model_type == 'lr' else 0,
+                    "num_features": 20000,
+                    "model_family": "multinomial"
+                },
+                metrics={
+                    "accuracy": eval_metrics.get("accuracy", 0.0),
+                    "f1_score": eval_metrics.get("f1_score", 0.0),
+                    "weighted_precision": eval_metrics.get("weighted_precision", 0.0),
+                    "weighted_recall": eval_metrics.get("weighted_recall", 0.0),
+                    "elapsed_time": elapsed_time
+                },
+                dataset_summary={
+                    "total_records": final_count,
+                    "labeled_records": labeled_count,
+                    "unlabeled_records": unlabeled_count
+                },
+                category_distribution=cat_distribution,
+                spark_model=final_model,
+                register_model=args.register_model,
+                min_f1_threshold=args.min_f1
+            )
+            print(f"  [MLOps] MLflow Run ID:       {mlops_info['run_id']}")
+            print(f"  [MLOps] Production Gate:     {'PASSED ✅' if mlops_info['passed_gate'] else 'REJECTED ❌'}")
+            print(f"  [MLOps] Promotion Stage:     {mlops_info['promotion_status']}")
+        except Exception as e:
+            print(f"  [MLOps WARNING] MLflow logging encountered: {e}")
+
     # Save summary JSON
     summary_data = {
         "total_records": final_count,
@@ -229,7 +291,8 @@ def run_pipeline():
         "hdfs_output_path": args.output,
         "local_output_path": args.local_output,
         "elapsed_time_seconds": elapsed_time,
-        "threshold_passed": final_count >= 7100
+        "threshold_passed": final_count >= 7100,
+        "mlops": mlops_info
     }
 
     if args.summary_output:

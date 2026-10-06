@@ -39,7 +39,9 @@ gradle-wrapper.jar
 # ── Hadoop / Spark temp files ────────────────────────────────────────────────
 derby.log
 metastore_db/
+mlruns/
 
 # ── OS ───────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+

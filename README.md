@@ -11,6 +11,8 @@ Institutional student email accounts accumulate thousands of messages containing
 
 This project implements a **BDA-first, distributed analytics pipeline** that converts a 1.3 GB Gmail mailbox export into structured records, classifies communications via **Weak Supervision + Spark MLlib**, extracts actionable opportunity metadata (deadlines, organizations, domains), executes analytical queries in **Apache Hive**, and visualizes insights on an interactive **Streamlit dashboard**.
 
+- The dashboard reads materialized analytics outputs from `data/output/analytics/`, so it can be demonstrated without a live Hadoop or Spark cluster.
+
 - **Dataset:** 7,287 raw emails (~1.3 GB MBOX) → **7,276 unique records** deduplicated via RFC 822 `Message-ID`.
 - **Classification Performance:** **90.49% Test Accuracy** and **90.25% Weighted F1** via Multinomial Logistic Regression on distributed TF-IDF features.
 - **Serving Architecture:** Decoupled Lambda-style serving layer; queries materialized into Parquet/CSV for sub-second dashboard rendering without live cluster dependencies.
